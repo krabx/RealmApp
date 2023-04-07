@@ -38,8 +38,6 @@ class TasksViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        print(currentTasks.count)
-        print(indexPath, indexPath.row)
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -67,7 +65,7 @@ class TasksViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let task = indexPath.section == 0 ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
         
-        let deleteButton = UIContextualAction(style: .destructive, title: "Delete") { [unowned self] _, _, _ in
+        let deleteButton = UIContextualAction(style: .destructive, title: nil) { [unowned self] _, _, _ in
             print("delete")
             storageManager.delete(task)
             tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -90,6 +88,13 @@ class TasksViewController: UITableViewController {
             isDone(true)
         }
         
+        let unDoneButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
+            print("undone")
+            storageManager.unDone(task)
+            //tableView.reloadRows(at: [indexPath], with: .automatic)
+            isDone(true)
+        }
+        
         deleteButton.image = UIImage(systemName: "bin.xmark")
         
         editButton.image = UIImage(systemName: "wrench")
@@ -97,7 +102,15 @@ class TasksViewController: UITableViewController {
         doneButton.image = UIImage(systemName: "checkmark")
         doneButton.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
         
-        return UISwipeActionsConfiguration(actions: [doneButton, editButton, deleteButton])
+        unDoneButton.image = UIImage(systemName: "arrow.uturn.backward")
+        unDoneButton.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
+        
+        if task.isComplete == false {
+            return UISwipeActionsConfiguration(actions: [doneButton, editButton, deleteButton])
+        } else {
+            return UISwipeActionsConfiguration(actions: [unDoneButton, editButton, deleteButton])
+        }
+
     }
 
 }

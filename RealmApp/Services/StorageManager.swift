@@ -77,6 +77,12 @@ class StorageManager {
         }
     }
     
+    func unDone(_ task: Task) {
+        write {
+            task.isComplete = false
+        }
+    }
+    
     private func write(completion: () -> Void) {
         do {
             try realm.write {
