@@ -36,6 +36,12 @@ class TasksViewController: UITableViewController {
         2
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        print(currentTasks.count)
+        print(indexPath, indexPath.row)
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         section == 0 ? currentTasks.count : completedTasks.count
     }
@@ -59,18 +65,28 @@ class TasksViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let task = indexPath.section == 0 ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
         
-        let deleteButton = UIContextualAction(style: .destructive, title: "Delete") { _, _, _ in
+        let deleteButton = UIContextualAction(style: .destructive, title: "Delete") { [unowned self] _, _, _ in
             print("delete")
+            storageManager.delete(task)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+
         }
         
-        let editButton = UIContextualAction(style: .normal, title: nil) { _, _, isDone in
+        let editButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
             print("edit")
+            showAlert(with: task) {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+            // разобраться с алертом, иначе пиздец
             isDone(true)
         }
         
-        let doneButton = UIContextualAction(style: .normal, title: nil) { _, _, isDone in
+        let doneButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
             print("done")
+            storageManager.done(task)
+            tableView.reloadData()
             isDone(true)
         }
         
@@ -95,7 +111,9 @@ extension TasksViewController {
         )
         let alert = taskAlertFactory.createAlert { [weak self] taskTitle, taskNote in
             if let task, let completion {
-                // TODO: - edit task
+                self?.storageManager.edit(task, newTaskName: taskTitle, newTaskNote: taskNote)
+                completion()
+                return
             } else {
                 self?.save(task: taskTitle, withNote: taskNote)
             }
