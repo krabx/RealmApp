@@ -66,14 +66,12 @@ class TasksViewController: UITableViewController {
         let task = indexPath.section == 0 ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
         
         let deleteButton = UIContextualAction(style: .destructive, title: nil) { [unowned self] _, _, _ in
-            print("delete")
             storageManager.delete(task)
             tableView.deleteRows(at: [indexPath], with: .automatic)
 
         }
         
         let editButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
-            print("edit")
             showAlert(with: task) {
                 tableView.reloadRows(at: [indexPath], with: .automatic)
             }
@@ -82,16 +80,18 @@ class TasksViewController: UITableViewController {
         }
         
         let doneButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
-            print("done")
-            storageManager.done(task)
-            tableView.reloadData()
+            storageManager.complete(task) { task in
+                let completedIndex = IndexPath(row: completedTasks.index(of: task) ?? 0, section: 1)
+                tableView.moveRow(at: indexPath, to: completedIndex)
+            }
             isDone(true)
         }
         
         let unDoneButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
-            print("undone")
-            storageManager.unDone(task)
-            //tableView.reloadRows(at: [indexPath], with: .automatic)
+            storageManager.complete(task) { task in
+                let currentIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
+                tableView.moveRow(at: indexPath, to: currentIndex)
+            }
             isDone(true)
         }
         
@@ -103,16 +103,13 @@ class TasksViewController: UITableViewController {
         doneButton.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
         
         unDoneButton.image = UIImage(systemName: "arrow.uturn.backward")
-        unDoneButton.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
+        unDoneButton.backgroundColor = #colorLiteral(red: 0.9411764741, green: 0.4980392158, blue: 0.3529411852, alpha: 1)
         
-        if task.isComplete == false {
-            return UISwipeActionsConfiguration(actions: [doneButton, editButton, deleteButton])
-        } else {
-            return UISwipeActionsConfiguration(actions: [unDoneButton, editButton, deleteButton])
-        }
+        return task.isComplete != true
+        ? UISwipeActionsConfiguration(actions: [doneButton, editButton, deleteButton])
+        : UISwipeActionsConfiguration(actions: [unDoneButton, editButton, deleteButton])
 
     }
-
 }
 
 extension TasksViewController {
