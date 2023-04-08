@@ -42,19 +42,9 @@ final class TaskListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskListCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
         let taskList = taskLists[indexPath.row]
-        content.text = taskList.title
         
-        var count = 0
-        for task in taskList.tasks {
-            if task.isComplete == true {
-                count += 1
-            }
-            if taskList.tasks.count == count {
-                content.secondaryText = "✓"
-            } else {
-                content.secondaryText = taskList.tasks.count.formatted()
-            }
-        }
+        content.text = taskList.title
+        content.secondaryText = checkComplete(in: taskList)
         
         cell.contentConfiguration = content
         return cell
@@ -116,6 +106,21 @@ final class TaskListViewController: UITableViewController {
                 tableView.reloadData()
             }
         }
+    }
+    
+    private func checkComplete(in taskList: TaskList) -> String {
+        var countComplete = 0
+        var countCurrent = 0
+        for task in taskList.tasks {
+            if task.isComplete == true {
+                countComplete += 1
+            } else {
+                countCurrent += 1
+            }
+        }
+        return taskList.tasks.count == countComplete
+        ? "✓"
+        : countCurrent.formatted()
     }
 }
 
