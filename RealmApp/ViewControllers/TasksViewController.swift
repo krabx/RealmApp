@@ -9,8 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TasksViewController: UITableViewController {
-    
+final class TasksViewController: UITableViewController {
     var taskList: TaskList!
     
     private var currentTasks: Results<Task>!
@@ -68,14 +67,12 @@ class TasksViewController: UITableViewController {
         let deleteButton = UIContextualAction(style: .destructive, title: nil) { [unowned self] _, _, _ in
             storageManager.delete(task)
             tableView.deleteRows(at: [indexPath], with: .automatic)
-
         }
         
         let editButton = UIContextualAction(style: .normal, title: nil) { [unowned self] _, _, isDone in
             showAlert(with: task) {
                 tableView.reloadRows(at: [indexPath], with: .automatic)
             }
-            // разобраться с алертом, иначе пиздец
             isDone(true)
         }
         

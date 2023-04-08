@@ -10,7 +10,6 @@ import UIKit
 import RealmSwift
 
 final class TaskListViewController: UITableViewController {
-
     private var taskLists: Results<TaskList>!
     private let storageManager = StorageManager.shared
     
@@ -87,7 +86,6 @@ final class TaskListViewController: UITableViewController {
     }
 
     @IBAction func sortingList(_ sender: UISegmentedControl) {
-        
         taskLists = sender.selectedSegmentIndex == 0
         ? taskLists.sorted(byKeyPath: "date", ascending: false)
         : taskLists.sorted(byKeyPath: "title")
@@ -111,6 +109,7 @@ final class TaskListViewController: UITableViewController {
     private func checkComplete(in taskList: TaskList) -> String {
         var countComplete = 0
         var countCurrent = 0
+        
         for task in taskList.tasks {
             if task.isComplete == true {
                 countComplete += 1
@@ -118,6 +117,7 @@ final class TaskListViewController: UITableViewController {
                 countCurrent += 1
             }
         }
+        
         return taskList.tasks.count == countComplete
         ? "✓"
         : countCurrent.formatted()
@@ -138,10 +138,8 @@ extension TaskListViewController {
                 completion()
                 return
             }
-            
             self?.save(taskListTitle: newValue)
         }
-        
         present(alert, animated: true)
     }
     
